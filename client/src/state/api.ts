@@ -27,15 +27,29 @@ export const api = createApi({
         try{
           const session = await fetchAuthSession()
           const { idToken } = session.tokens ?? {}
+          console.log("IdToken : " , idToken);
+
           const user = await getCurrentUser()
+          console.log("user : " , user)
           const userRole = idToken?.payload["custom:Role"] as string
 
           const endpoint = 
             userRole === 'manager'
-            ? `/managers/${user.userId}`
-            : `/tenants/${user.userId}`
+            ? `/managers/${user?.userId}`
+            : `/tenants/${user?.userId}`
+
+            
 
             let userDetailsResponse = await fetchWithBQ(endpoint)
+
+            if(userDetailsResponse?.error ){
+              console.log('Fwetch with Bq failed : ' , userDetailsResponse.error)      // yh chala
+            }
+            else{
+              console.log('userDetailsResponse',userDetailsResponse)
+              console.log('userDetailsResponse.data',userDetailsResponse.data)
+
+            }
             console.log('userDetailsResponse',userDetailsResponse)
 
             // if user does not exists , create a new user..

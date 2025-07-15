@@ -7,9 +7,9 @@ export const getManager = async( req : Request , res : Response ) : Promise<void
         const { cognitoId } = req.params
         const manager = await prisma.manager.findUnique({
             where : {cognitoId},
-            include : {
-                managedProperties : true
-            }
+            // include : {
+            //     managedProperties : true
+            // }
         })
 
         if(manager){
