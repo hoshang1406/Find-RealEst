@@ -18,9 +18,11 @@ export const api = createApi({
     }
   }),
   reducerPath: "api",
-  tagTypes: [],
+  tagTypes: ["Managers","Tenants"],
   endpoints: (build) => ({
 
+    // query is for GET Requests
+    // mutation is for PUT, PATCH, DELETE requests ==> anything that changes the data.
 
     getAuthUser : build.query<User, void>({
       queryFn : async (_ , _queryApi, _extraoptions, fetchWithBQ) => {
@@ -38,9 +40,9 @@ export const api = createApi({
             ? `/managers/${user?.userId}`
             : `/tenants/${user?.userId}`
 
-            
-
             let userDetailsResponse = await fetchWithBQ(endpoint)
+
+            console.log("userDetailsResoonse : ", userDetailsResponse)
 
             if(userDetailsResponse?.error ){
               console.log('Fwetch with Bq failed : ' , userDetailsResponse.error)      // yh chala
@@ -68,10 +70,35 @@ export const api = createApi({
           return { error : error.message || "Could not fetch userdata"}
         }
       }
+    }),
+
+// we want Tenant is Return
+// we'll give cognitoId and somedetails of the Tenant
+    updateTenantSettings : build.mutation<Tenant, {cognitoId : string} & partial<Tenant>  >({
+     query : ({ cognitoId , ...updatedTenant}) => ({
+      url : `tenants/${cognitoId}`,
+      method : `PUT`,
+      body : updatedTenant
+     }),
+     invalidatesTags : (result) => [{ type : "Tenants" , id : result.id}]
+    }),
+
+
+    updateManagerSettings : build.mutation<Manager , {cognitoId : string} & partial<Manager> >({
+      query : ({ cognitoId , ...updatedManager}) => ({
+        url : `managers/${cognitoId}`,
+        method : "PUT",
+        body : updatedManager
+      }),
+      invalidatesTags : (result) => [{ type : "Managers" , id : result.id}]
     })
+
+
   }),
 });
 
 export const {
   useGetAuthUserQuery,
+  useUpdateTenantSettingsMutation,
+  useUpdateManagerSettingsMutation,
 } = api
